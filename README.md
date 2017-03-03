@@ -28,5 +28,5 @@ The plugin will not be enabled by default, so simply add the following line to y
 `config/config.php` file to enable it:
 
 ```
-$config[ 'PicoTooManyPages.enabled' ] = false;
+$config[ 'PicoTooManyPages.enabled' ] = true;
 ```
