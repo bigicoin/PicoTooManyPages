@@ -40,6 +40,7 @@ final class PicoTooManyPages extends AbstractPicoPlugin
 
 	protected $configCache = null;
 	protected $contentDir = '';
+	protected $isPicoEdit = false;
 
 	/**
 	 * Triggered after Pico has read its configuration
@@ -54,6 +55,22 @@ final class PicoTooManyPages extends AbstractPicoPlugin
 	}
 
 	/**
+	 * Triggered after Pico has evaluated the request URL
+	 *
+	 * @see    Pico::getRequestUrl()
+	 * @param  string &$url part of the URL describing the requested contents
+	 * @return void
+	 */
+	public function onRequestUrl(&$url)
+	{
+		$parts = explode('/', $url);
+		// detect for pico_edit
+		if ($parts[0] == 'pico_edit') {
+			$this->isPicoEdit = true;
+		}
+	}
+
+	/**
 	 * Triggered before Pico reads all known pages
 	 *
 	 * @see    Pico::readPages()
@@ -63,6 +80,9 @@ final class PicoTooManyPages extends AbstractPicoPlugin
 	 */
 	public function onPagesLoading()
 	{
+		if ($this->isPicoEdit) {
+			return; // do not skip loading pages on pico_edit urls
+		}
 		// we disable reading of pages by setting content_dir to a dummy directory
 		$this->contentDir = $this->configCache['content_dir'];
 		$this->configCache['content_dir'] = dirname(__FILE__).'/picotmp_dummy/';
