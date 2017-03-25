@@ -64,9 +64,27 @@ final class PicoTooManyPages extends AbstractPicoPlugin
 	public function onRequestUrl(&$url)
 	{
 		$parts = explode('/', $url);
-		// detect for pico_edit
-		if ($parts[0] == 'pico_edit') {
+		// detect for pico_edit, but only pico_edit main page, not the action urls.
+		if ($parts[0] == 'pico_edit' && count($parts) == 1) {
 			$this->isPicoEdit = true;
+		}
+	}
+
+	/**
+	 * Triggered after Pico has discovered the content file to serve
+	 *
+	 * @see    Pico::getBaseUrl()
+	 * @see    Pico::getRequestFile()
+	 * @param  string &$file absolute path to the content file to serve
+	 * @return void
+	 */
+	public function onRequestFile(&$file)
+	{
+		// because pico_edit triggers sessions in onRequestUrl, we need to check for its session status afterward,
+		// which is here.
+		// Additionally, the login action uses $_POST['password'], make sure to load files on that action too.
+		if ($this->isPicoEdit && empty($_SESSION['backend_logged_in']) && empty($_POST['password'])) {
+			$this->isPicoEdit = false; // if pico_edit, but not logged in, no need to load files either.
 		}
 	}
 
